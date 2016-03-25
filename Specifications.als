@@ -1,9 +1,10 @@
-sig Coordonnee{} //Describe a position, in X or Y
-abstract sig Position {
-	abscisse, ordonnee : Coordonnee
-}
+open util/ordering[Time] as to
+sig Time {}
 
-sig Drone {position : Position } // A drone have a position on the grid 
+sig Position {x, y : Int} //Describe a position, in X or Y
+
+sig Drone {position : Position,
+				time : Time } // A drone have a position on the grid 
 
 one sig Entrepot {position : Position} // There is only one warehouse which have a position on the grid
 
@@ -20,7 +21,22 @@ pred SoloReceptacle{ //Two Receptacle can not have the same position
 											(r0.position = r1.position)
 }
 
+pred SoloEntrepot {
+	no r : Receptacle, e : Entrepot | r.position = e.position
+}
+
+pred SoloPosition{
+	no p0, p1 : Position | (p0 != p1) &&
+									((p0.x = p1.x) && (p0.y = p1.y))
+}
+
+assert DifferentePosition {
+	no p0, p1 : Position | (p0 != p1) && (p0.x = p1.x) && (p0.y = p1.y) && SoloReceptacle && SoloEntrepot && SoloDrone && SoloPosition 
+}
+
+check DifferentePosition
 
 pred go{}
 
-run SoloReceptacle
+run SoloDrone for 2 but exactly 2 Drone, 2 Receptacle
+run SoloEntrepot for 2 but exactly 2 Receptacle
