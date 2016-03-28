@@ -4,16 +4,19 @@ sig Time {}
 sig Position {x, y : Int} //Describe a position, in X or Y
 
 sig Drone {position : Position,
-				time : Time } // A drone have a position on the grid 
+				time : Time,
+				capacity : Int,
+				energie : Int
+				 } // A drone have a position on the grid 
 
 one sig Entrepot {position : Position} // There is only one warehouse which have a position on the grid
 
 sig Receptacle {position : Position} //There are receptacle which have a position on the grid
 
 
-pred SoloDrone { //Two drones can not have the same position
+pred SoloDrone { //Two drones can not have the same position at the same time
 	no d0, d1 : Drone | (d0 != d1) &&
-									(d0.position = d1.position)
+									(d0.position = d1.position) && (d0.time = d1.time)
 }
 
 pred SoloReceptacle{ //Two Receptacle can not have the same position
@@ -21,22 +24,27 @@ pred SoloReceptacle{ //Two Receptacle can not have the same position
 											(r0.position = r1.position)
 }
 
-pred SoloEntrepot {
+pred SoloEntrepot {//There is only one Entrepot
 	no r : Receptacle, e : Entrepot | r.position = e.position
 }
 
-pred SoloPosition{
+pred SoloPosition{//Two Position have different coordinates
 	no p0, p1 : Position | (p0 != p1) &&
 									((p0.x = p1.x) && (p0.y = p1.y))
 }
 
-assert DifferentePosition {
-	no p0, p1 : Position | (p0 != p1) && (p0.x = p1.x) && (p0.y = p1.y) && SoloReceptacle && SoloEntrepot && SoloDrone && SoloPosition 
+pred DifferentePosition {
+ SoloReceptacle && SoloEntrepot && SoloDrone && SoloPosition 
+}
+pred MaxEnergie {
+	all d : Drone | d.energie <= 3 && d.energie >= 0
 }
 
-check DifferentePosition
 
-pred go{}
 
-run SoloDrone for 2 but exactly 2 Drone, 2 Receptacle
-run SoloEntrepot for 2 but exactly 2 Receptacle
+pred go{
+	DifferentePosition && MaxEnergie
+}
+
+run go for 2 but exactly 3 Drone, 2 Receptacle, 3 Position
+
