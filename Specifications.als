@@ -1,7 +1,8 @@
 open util/ordering[Time] as to
 sig Time {}
 
-sig Position {x, y : Int} //Describe a position, in X or Y
+sig Position {x, y : Int
+					} //Describe a position, in X or Y
 
 sig Drone {position : Position,
 				time : Time,
@@ -9,10 +10,18 @@ sig Drone {position : Position,
 				energie : Int
 				 } // A drone have a position on the grid 
 
-one sig Entrepot {position : Position} // There is only one warehouse which have a position on the grid
 
-sig Receptacle {position : Position} //There are receptacle which have a position on the grid
+sig Receptacle {position : Position} //There are receptacle which have a position on the grid 
 
+
+one sig Entrepot {position : Position,
+							 receptaclesVoisins : some Receptacle 	//An Entrepot contains at least one " receptables voisins " (contrainte 13)
+							} // There is only one warehouse which have a position on the grid
+
+pred ReceptacleVoisins {
+	all e : Entrepot | (e.position.y= e.receptaclesVoisins.position.y && (minus [e.position.x , e.receptaclesVoisins.position.x]=1 ) or ( minus [e.position.x , e.receptaclesVoisins.position.x]=-1 ))
+	or ( e.position.x= e.receptaclesVoisins.position.x && ( minus [e.position.y , e.receptaclesVoisins.position.y]=1 ) or (minus [e.position.y , e.receptaclesVoisins.position.y]=1)) 
+}
 
 pred SoloDrone { //Two drones can not have the same position at the same time
 	no d0, d1 : Drone | (d0 != d1) &&
@@ -43,8 +52,7 @@ pred MaxEnergie {
 
 
 pred go{
-	DifferentePosition && MaxEnergie
+	DifferentePosition && MaxEnergie && ReceptacleVoisins
 }
 
-run go for 2 but exactly 3 Drone, 2 Receptacle, 3 Position
-
+run go for 2 but exactly 3 Drone, 2 Receptacle, 8 Position
