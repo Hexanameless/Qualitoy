@@ -15,7 +15,7 @@ sig Receptacle {position : Position} //There are receptacle which have a positio
 
 
 one sig Entrepot {position : Position,
-							 receptaclesVoisins : some Receptacle 	//An Entrepot contains at least one " receptables voisins " (contrainte 13)
+							 receptaclesVoisins : some Receptacle    	//An Entrepot contains at least one " receptables voisins " (contrainte 13)
 							} // There is only one warehouse which have a position on the grid
 
 pred ReceptacleVoisins {
