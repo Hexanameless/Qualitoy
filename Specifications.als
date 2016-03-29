@@ -5,9 +5,9 @@
  					} //Describe a position, in X or Y
  
  sig Drone {position : Position,
- 				time : Time,
  				capacity : Int,
- 				energie : Int
+ 				energie : Int,
+				currentPosition : Position one -> Time
  				 } // A drone have a position on the grid 
  
  
@@ -17,6 +17,12 @@
  one sig Entrepot {position : Position
  							   // receptaclesVoisins : some Receptacle    	//An Entrepot contains at least one " receptables voisins " (contrainte 13)
  							} // There is only one warehouse which have a position on the grid
+
+ fact soloDrone  // Two drones can not be on the same position at the same time
+{
+	all t :Time |  no d0, d1 : Drone | (d0 != d1) &&
+									(d0.currentPosition.t = d1.currentPosition.t)												
+}
  
  pred ReceptacleVoisin [ p : Position ]{
     some  r : Receptacle | (p.y= r.position.y && ((minus [p.x , r.position.x]=1 ) or ( minus [p.x , r.position.x]=-1 )))
@@ -26,11 +32,6 @@
 pred VoisinEntrepot {
 	all e : Entrepot | ReceptacleVoisin [ e.position ]
 } 
-
- pred SoloDrone { //Two drones can not have the same position at the same time
- 	no d0, d1 : Drone | (d0 != d1) &&
- 									(d0.position = d1.position) && (d0.time = d1.time)
- }
  
  pred SoloReceptacle{ //Two Receptacle can not have the same position
  	no r0, r1 : Receptacle | (r0 != r1)&& 
@@ -47,7 +48,7 @@ pred VoisinEntrepot {
  }
  
  pred DifferentePosition {
-  SoloReceptacle && SoloEntrepot && SoloDrone && SoloPosition 
+  SoloReceptacle && SoloEntrepot && SoloPosition 
  }
  pred MaxEnergie {
  	all d : Drone | d.energie <= 3 && d.energie >= 0
