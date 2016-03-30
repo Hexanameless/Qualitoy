@@ -32,6 +32,10 @@ fact soloReceptacle {
 	r0.position = r1.position
 }
 
+fact grilleReduite {
+	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
+}
+
 fun absoluteValue [ a : Int ] : Int {
     a>=0 => a 
     else mul[-1,a] 
@@ -68,7 +72,7 @@ pred voisin [ p : Position ]{ // voisin : distance de manhattan = 1 unité
 
 pred voisinEntrepot {
     one e : Entrepot |
-	receptacleVoisin [ e.position ]
+	voisin [ e.position ]
 }
 
 pred testM {
@@ -77,10 +81,21 @@ pred testM {
 	p0.y =2 &&
 	p1.x = 1 &&
 	p1.y = 1 &&
-	distanceManhattan[p0, p1] =2
+	distanceManhattan[p0, p1] =4
 }
 
 run testM for 2 but exactly 2 Position
+
+pred receptacleVoisin {
+	all r1 : Receptacle | some r2 : Receptacle | distanceManhattan[r1.position, r2.position] <=3
+}
+
+assert test {
+	some r1 : Receptacle | all r2 : Receptacle | r1!=r2 && distanceManhattan[r1.position, r2.position] > 3 && receptacleVoisin
+}
+check test for 4 but exactly 4 Receptacle, 6 Int
+
+run receptacleVoisin for 2
 
 /*fun EstAccessible [ p : Position ] : Int {
     one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
