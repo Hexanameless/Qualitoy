@@ -6,11 +6,12 @@ sig Position {
 } //Describe a position, in X or Y
 
 sig Drone {
-    currentPosition : Position one -> Time
+    currentPosition : Position one -> Time,
+	capacite : Int
 } // A drone have a position on the grid 
 
 sig Receptacle {
-	position : Position
+	position : Position,
 	capacite : Int
 } //There are receptacle which have a position on the grid 
 
@@ -23,10 +24,6 @@ sig Commande {
 	produits : Int,
 	cible : Receptacle
 }
-
-pred go{}
-
-run go
 
 fact soloDrone {  // Two drones can not be on the same position at the same time
     all t : Time | 
@@ -49,6 +46,24 @@ fact soloDeplacement {
 	all d : Drone | all t,t1 : Time | t1!=t.next || distanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
 }
 
+fact soloCapaDrone {
+	all d1, d2 : Drone | d1.capacite = d2.capacite
+}
+
+fact soloCapaRecep {
+	all r1, r2 : Receptacle | r1.capacite = r2.capacite
+}
+
+fact tailleCommandeDrone {
+	all c : Commande | no d : Drone | c.produits > d.capacite
+}
+
+fact tailleCommandeRecep {
+	all c : Commande | no r : Receptacle | c.produits > r.capacite
+}
+
+pred go{}
+run go for 3
 
 
 fun absoluteValue [ a : Int ] : Int {
