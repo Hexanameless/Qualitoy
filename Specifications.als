@@ -69,6 +69,12 @@ fact recharge {
 	d.batterie.unite.t1 = plus[d.batterie.unite.t,1]
 }
 
+/*
+fact tropLoin {
+	all d : Drone | all t,t1
+	"assez d'énergie" || d.currentPosition.t = d.currentPosition.t1
+*/
+
 fact droneInactif {
 	all d : Drone | all t,t1 : Time | some r : Receptacle | some e : Entrepot |
 	 t1!=t.next || 
