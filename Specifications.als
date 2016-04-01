@@ -14,7 +14,7 @@ sig Drone {
     currentPosition : Position one -> Time,
 	commande : Commande lone -> Time,
 	capacite : Int,
-	batterie : Batterie one
+	batterie : one Batterie
 } // A drone have a position on the grid 
 
 sig Receptacle {
