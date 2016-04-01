@@ -6,18 +6,24 @@ sig Position {
 } //Describe a position, in X or Y
 
 sig Drone {
-	position : Position,
-    currentPosition : Position one -> Time
+    currentPosition : Position one -> Time,
+	capacite : Int
 } // A drone have a position on the grid 
 
 sig Receptacle {
-	position : Position
+	position : Position,
+	capacite : Int
 } //There are receptacle which have a position on the grid 
 
 one sig Entrepot {
 	position : Position
 // receptaclesVoisins : some Receptacle        //An Entrepot contains at least one " receptables voisins " (contrainte 13)
 } // There is only one warehouse which have a position on the grid
+
+sig Commande {
+	produits : Int,
+	cible : Receptacle
+}
 
 fact soloDrone {  // Two drones can not be on the same position at the same time
     all t : Time | 
@@ -37,6 +43,29 @@ fact grilleReduite {
 }
 
 
+fact soloDeplacement {
+	all d : Drone | all t,t1 : Time | t1!=t.next || distanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
+}
+
+fact soloCapaDrone {
+	all d1, d2 : Drone | d1.capacite = d2.capacite
+}
+
+fact soloCapaRecep {
+	all r1, r2 : Receptacle | r1.capacite = r2.capacite
+}
+
+fact tailleCommandeDrone {
+	all c : Commande | no d : Drone | c.produits > d.capacite
+}
+
+fact tailleCommandeRecep {
+	all c : Commande | no r : Receptacle | c.produits > r.capacite
+}
+/*
+pred go{}
+run go for 3
+*/
 
 fun absoluteValue [ a : Int ] : Int {
     a>=0 => a 
@@ -86,11 +115,11 @@ pred distanceReceptacle { // contrainte 14
 
 pred testM {
 	some p0, p1 : Position |
-	p0.x = -2 &&
+	p0.x = 2 &&
 	p0.y =2 &&
 	p1.x = 1 &&
 	p1.y = 1 &&
-	distanceManhattan[p0, p1] =4
+	distanceManhattan[p0, p1] = 2
 }
 
 
@@ -111,3 +140,4 @@ run go for 2 but exactly 3 Receptacle,4 Position
 /*fun EstAccessible [ p : Position ] : Int {
     one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
 }*/
+run testM for 2 but exactly 2 Position
