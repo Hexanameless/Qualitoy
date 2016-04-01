@@ -47,11 +47,11 @@ fact soloDeplacement {
 }
 
 fact soloCapaDrone {
-	all d1, d2 : Drone | d1.capacite = d2.capacite
+	all d1, d2 : Drone | d1.capacite = d2.capacite && d1.capacite > 0
 }
 
 fact soloCapaRecep {
-	all r1, r2 : Receptacle | r1.capacite = r2.capacite
+	all r1, r2 : Receptacle | r1.capacite = r2.capacite && r1.capacite > 0
 }
 
 fact tailleCommandeDrone {
@@ -62,8 +62,16 @@ fact tailleCommandeRecep {
 	all c : Commande | no r : Receptacle | c.produits > r.capacite
 }
 
+fact rnb {
+	#Drone = 3
+}
+
+fact dnb {
+	#Receptacle = 5
+}
+
 pred go{}
-run go for 3
+run go for 6
 
 
 fun absoluteValue [ a : Int ] : Int {
