@@ -142,8 +142,7 @@ fun distanceManhattan [ p1, p2 : Position ] : Int {
 }
 
 pred voisin [ p : Position ]{ // voisin : distance de manhattan = 1 unité
-   some  r : Receptacle | (p.y= r.position.y && ((minus [p.x , r.position.x]=1 ) or ( minus [p.x , r.position.x]=-1 )))
-    or ( p.x= r.position.x && (( minus [p.y , r.position.y]=1 ) or (minus [p.y , r.position.y]=1))) 
+   some  r : Receptacle | distanceManhattan[r.position,p]=1
 }
 
 pred voisinEntrepot {
