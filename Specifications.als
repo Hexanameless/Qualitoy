@@ -69,6 +69,15 @@ fact recharge {
 	d.batterie.unite.t1 = plus[d.batterie.unite.t,1]
 }
 
+fact droneInactif {
+	all d : Drone | all t,t1 : Time | some r : Receptacle | some e : Entrepot |
+	 t1!=t.next || 
+	d.currentPosition.t != d.currentPosition.t1 ||
+	d.currentPosition.t = r.position ||
+	d.currentPosition.t = e.position ||
+	d.batterie.unite.t1 = d.batterie.unite.t
+}
+
 fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
 }
@@ -147,5 +156,5 @@ fact soloBatterie {
 }
 
 pred go{}
-run go for 4
+run go for 4 but 10 Position, 6 Time
 
