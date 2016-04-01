@@ -42,6 +42,7 @@ fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
 }
 
+
 fact soloDeplacement {
 	all d : Drone | all t,t1 : Time | t1!=t.next || distanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
 }
@@ -70,10 +71,6 @@ fact dnb {
 	#Receptacle = 5
 }
 
-pred go{}
-run go for 6
-
-
 fun absoluteValue [ a : Int ] : Int {
     a>=0 => a 
     else mul[-1,a] 
@@ -83,16 +80,18 @@ fun distanceManhattan [ p1, p2 : Position ] : Int {
     plus [ absoluteValue [ minus[p1.x, p2.x] ] ,  absoluteValue [ minus[p1.y, p2.y] ] ]
 }
 
-//TODO un receptacle et un entrepot ne peuvent pas etre sur la meme position
+fact entrepotDiffReceptacle {
+	no e : Entrepot | some r1 : Receptacle | e.position = r1.position
+} // un receptacle et un entrepot ne peuvent pas etre sur la meme position
 
-/*-----------------------------Ne pas supprimer
-pred soloPosition  {
+
+fact soloPosition  {
 	no p0, p1 : Position |
 	p0 != p1 &&
-	p0.x = p1.x &&
-	p0.y = p1.y
+	(p0.x = p1.x ||
+	p0.y = p1.y)
 }
-
+/*
 assert A1 {
 	no p0, p1 : Position |
 	p0 != p1 &&
@@ -113,6 +112,11 @@ pred voisinEntrepot {
 	voisin [ e.position ]
 }
 
+
+pred distanceReceptacle { // contrainte 14
+	no r1: Receptacle | all r2:Receptacle | ( ( r1!=r2 ) && ( distanceManhattan [r1.position,r2.position] > 3 ))
+}
+
 pred testM {
 	some p0, p1 : Position |
 	p0.x = 2 &&
@@ -122,4 +126,22 @@ pred testM {
 	distanceManhattan[p0, p1] = 2
 }
 
+
+
+//run testM for 2 but exactly 2 Position
+
+pred go {
+  distanceReceptacle &&  voisinEntrepot
+}
+
+/*assert test {
+	some r1 : Receptacle | all r2 : Receptacle | r1!=r2 && distanceManhattan[r1.position, r2.position] > 3 
+}
+
+ check test for 4 but exactly 4 Receptacle, 6 Int */
+
+run go for 2 but exactly 3 Receptacle,4 Position
+/*fun EstAccessible [ p : Position ] : Int {
+    one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
+}*/
 run testM for 2 but exactly 2 Position
