@@ -7,7 +7,8 @@ sig Position {
 
 sig Drone {
 	position : Position,
-    currentPosition : Position one -> Time
+    currentPosition : Position one -> Time,
+	commande : Commande lone -> Time
 } // A drone have a position on the grid 
 
 sig Receptacle {
@@ -26,13 +27,24 @@ sig Commande {
 
 pred go{}
 
-run go
+run go for 4 but exactly 3 Drone, 4 Commande
+assert A0 {
+}
+
+check A0 for 10 but exactly 10 Drone, 10 Receptacle, 7 Commande
 
 fact soloDrone {  // Two drones can not be on the same position at the same time
     all t : Time | 
 	no d0, d1 : Drone |
 	d0 != d1 && 
 	d0.currentPosition.t = d1.currentPosition.t
+}
+
+fact soloDroneParCommande {	// Two drones can not have the same command
+	all t : Time |
+	no d0, d1 : Drone |
+	d0 != d1 &&
+	d0.commande.t = d1.commande.t
 }
 
 fact soloReceptacle {
