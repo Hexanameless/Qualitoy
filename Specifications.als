@@ -19,6 +19,15 @@ one sig Entrepot {
 // receptaclesVoisins : some Receptacle        //An Entrepot contains at least one " receptables voisins " (contrainte 13)
 } // There is only one warehouse which have a position on the grid
 
+sig Commande {
+	produits : Int,
+	cible : Receptacle
+}
+
+pred go{}
+
+run go
+
 fact soloDrone {  // Two drones can not be on the same position at the same time
     all t : Time | 
 	no d0, d1 : Drone |
@@ -91,12 +100,3 @@ pred testM {
 }
 
 run testM for 2 but exactly 2 Position
-
-
-
-
-
-
-/*fun EstAccessible [ p : Position ] : Int {
-    one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
-}*/
