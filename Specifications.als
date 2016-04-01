@@ -6,12 +6,12 @@ sig Position {
 } //Describe a position, in X or Y
 
 sig Drone {
-	position : Position,
     currentPosition : Position one -> Time
 } // A drone have a position on the grid 
 
 sig Receptacle {
 	position : Position
+	capacite : Int
 } //There are receptacle which have a position on the grid 
 
 one sig Entrepot {
@@ -35,6 +35,12 @@ fact soloReceptacle {
 fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
 }
+
+fact soloDeplacement {
+	all d : Drone | all t,t1 : Time | t1!=t.next || distanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
+}
+
+
 
 fun absoluteValue [ a : Int ] : Int {
     a>=0 => a 
@@ -77,25 +83,19 @@ pred voisinEntrepot {
 
 pred testM {
 	some p0, p1 : Position |
-	p0.x = -2 &&
+	p0.x = 2 &&
 	p0.y =2 &&
 	p1.x = 1 &&
 	p1.y = 1 &&
-	distanceManhattan[p0, p1] =4
+	distanceManhattan[p0, p1] = 2
 }
 
 run testM for 2 but exactly 2 Position
 
-pred receptacleVoisin {
-	all r1 : Receptacle | some r2 : Receptacle | distanceManhattan[r1.position, r2.position] <=3
-}
 
-assert test {
-	some r1 : Receptacle | all r2 : Receptacle | r1!=r2 && distanceManhattan[r1.position, r2.position] > 3 && receptacleVoisin
-}
-check test for 4 but exactly 4 Receptacle, 6 Int
 
-run receptacleVoisin for 2
+
+
 
 /*fun EstAccessible [ p : Position ] : Int {
     one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
