@@ -58,7 +58,7 @@ fact  CapBatterie {
 
 
 fact ConsommeEnergie {
-	 all d : Drone | all t,t1 : Time | t1!=t.next && d.currentPosition.t = d.currentPosition.t1 || d.batterie.t1.unite = minus[d.batterie.t.unite,1]
+	 all d : Drone | all t,t1 : Time | t1!=t.next && d.currentPosition.t = d.currentPosition.t1 || d.batterie.unite.t1 = minus[d.batterie.unite.t,1]
 }//Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
 
 fact grilleReduite {
