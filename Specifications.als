@@ -32,14 +32,6 @@ sig Commande {
 	cible : Receptacle
 }
 
-pred go{}
-
-run go for 4 but exactly 3 Drone, 4 Commande
-assert A0 {
-}
-
-check A0 for 10 but exactly 10 Drone, 10 Receptacle, 7 Commande
-
 fact soloDrone {  // Two drones can not be on the same position at the same time
     all t : Time | 
 	no d0, d1 : Drone |
@@ -64,8 +56,8 @@ fact  CapBatterie {
 	all b : Batterie | b.unite <= 3
 }//La capacité de la batterie d’un drone est de 3 unités d’énergie.
 
-fact CosumeEnergie {
-	 all d : Drone | all t,t1 : Time | t1=t.next && d.currentPosition.t = d.currentPosition.t1 || d.batterie.t1.unite = minus[d.batterie.t.unite,1]
+fact ConsommeEnergie {
+	 all d : Drone | all t,t1 : Time | t1!=t.next && d.currentPosition.t = d.currentPosition.t1 || d.batterie.t1.unite = minus[d.batterie.t.unite,1]
 }//Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
 
 fact grilleReduite {
@@ -101,6 +93,18 @@ fact dnb {
 	#Receptacle = 5
 }
 
+fact entrepotDiffReceptacle {
+	no e : Entrepot | some r1 : Receptacle | e.position = r1.position
+} // un receptacle et un entrepot ne peuvent pas etre sur la meme position
+
+
+fact soloPosition  {
+	no p0, p1 : Position |
+	p0 != p1 &&
+	(p0.x = p1.x &&
+	p0.y = p1.y)
+}
+
 fun absoluteValue [ a : Int ] : Int {
     a>=0 => a 
     else mul[-1,a] 
@@ -110,17 +114,7 @@ fun distanceManhattan [ p1, p2 : Position ] : Int {
     plus [ absoluteValue [ minus[p1.x, p2.x] ] ,  absoluteValue [ minus[p1.y, p2.y] ] ]
 }
 
-fact entrepotDiffReceptacle {
-	no e : Entrepot | some r1 : Receptacle | e.position = r1.position
-} // un receptacle et un entrepot ne peuvent pas etre sur la meme position
 
-
-fact soloPosition  {
-	no p0, p1 : Position |
-	p0 != p1 &&
-	(p0.x = p1.x ||
-	p0.y = p1.y)
-}
 /*
 assert A1 {
 	no p0, p1 : Position |
