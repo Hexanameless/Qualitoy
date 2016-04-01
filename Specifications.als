@@ -14,7 +14,7 @@ sig Drone {
     currentPosition : Position one -> Time,
 	commande : Commande lone -> Time,
 	capacite : Int,
-	batterie : Batterie one
+	batterie : one Batterie
 } // A drone have a position on the grid 
 
 sig Receptacle {
@@ -118,7 +118,7 @@ fact entrepotDiffReceptacle {
 fact soloPosition  {
 	no p0, p1 : Position |
 	p0 != p1 &&
-	(p0.x = p1.x ||
+	(p0.x = p1.x &&
 	p0.y = p1.y)
 }
 /*
