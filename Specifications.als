@@ -5,9 +5,14 @@ sig Position {
 	x, y : Int
 } //Describe a position, in X or Y
 
+sig Batterie {
+	unite : Int
+}
+
 sig Drone {
     currentPosition : Position one -> Time,
-	capacite : Int
+	capacite : Int,
+	batterie : Batterie one -> Time
 } // A drone have a position on the grid 
 
 sig Receptacle {
@@ -37,6 +42,14 @@ fact soloReceptacle {
 	r0 != r1 &&
 	r0.position = r1.position
 }
+
+fact  CapBatterie {
+	all b : Batterie | b.unite <= 3
+}//La capacité de la batterie d’un drone est de 3 unités d’énergie.
+
+fact CosumeEnergie {
+	 all d : Drone | all t,t1 : Time | t1=t.next && d.currentPosition.t = d.currentPosition.t1 || d.batterie.t1.unite = minus[d.batterie.t.unite,1]
+}//Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
 
 fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
