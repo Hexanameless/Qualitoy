@@ -70,27 +70,32 @@ fact DistinctCouple {
 fact nbCouple{
 	#Couple = #Receptacle
 }
-pred VerifDepart[d : Position, c : set Couple]{
-	(one co:Couple|(co in c&&co.p1=d))&&(no co:Couple|(co in c&&co.p2=d))
+
+pred verifDepart[ch:Chemin]{
+	(one co:Couple|co in ch.value&&co.p1=ch.depart)&&(no co:Couple|co in ch.value&&co.p2=ch.depart)
 }
 
-pred VerifArrivee[d : Position, c : set Couple]{
-	(one co:Couple|(co in c&&co.p2=d))&&(no co:Couple|(co in c&&co.p1=d))
+pred verifArrivee[ch:Chemin]{
+	(one co:Couple|co in ch.value&&co.p2=ch.arrivee)&&(no co:Couple|co in ch.value&&co.p1=ch.arrivee)
+}
+pred verifMilieu[ch:Chemin]{
+	(all co:Couple|co in ch.value&&(co.p1=ch.depart||(one co2:Couple |co2 in ch.value&&co2.p2=co.p1))&&(co.p2=ch.arrivee||(one co2:Couple|co2 in ch.value&&co2.p1=co.p2)))
 }
 
-pred Verif[d : Position, c : set Couple]{
-	VerifDepart[d,c]||VerifArrivee[d,c]||((one co:Couple|(co in c&&co.p1=d))&&(one co:Couple|(co in c&&co.p2=d)))
+fact uniqueChemin{
+    #Chemin = 1
 }
-
 
 fact defChemin{
 
-	all c : Chemin|VerifDepart[c.depart,c.value]&&VerifArrivee[c.arrivee,c.value]&&(all co:Couple |not(co in c.value)||((co.p1=c.depart||(one co2:Couple| not co2 in c.value||co2.p2=co.p1))&&(co.p2=c.arrivee||(one co2:Couple| not co2 in c.value||co2.p1=co.p2))))
+	all ch:Chemin|verifDepart[ch]&&verifArrivee[ch]&&verifMilieu[ch]
 
 }
-
+fact depEntrepot{
+	all ch:Chemin|ch.depart=Entrepot.position
+}
 
 pred go{
 	 (no p : Position | p.x<0||p.x>4||p.y<0||p.y>4)
 }
- run  go for 10 but exactly 5 Position, exactly 3 Receptacle, exactly 2 Chemin
+ run  go for 10 but exactly 4 Position, exactly 2 Receptacle
