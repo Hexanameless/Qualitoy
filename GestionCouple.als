@@ -1,3 +1,5 @@
+open util/integer
+
 sig Receptacle {
 	position : Position,
 	capacite : Int
@@ -9,7 +11,10 @@ sig Couple {
 	r : p1 -> p2
 }
 
-one sig Entrepot{p:Position}
+one sig Entrepot{position:Position}
+// receptaclesVoisins : some Receptacle        
+//An Entrepot contains at least one " receptables voisins " (contrainte 13)
+// There is only one warehouse which have a position on the grid
 
 fun AbsoluteValue [ a:Int ] : Int {
 	a>=0 => a 
@@ -25,7 +30,7 @@ fact CapaciteRec{
 }
 
 fact PositionRec{
-	all c:Couple | (((one r : Receptacle|r.position=c.p1)||Entrepot.p=c.p1)&&((one r : Receptacle|r.position=c.p2)||Entrepot.p=c.p2))&&(no r : Receptacle|r.position=Entrepot.p)
+	all c:Couple | (((one r : Receptacle|r.position=c.p1)||Entrepot.position=c.p1)&&((one r : Receptacle|r.position=c.p2)||Entrepot.position=c.p2))&&(no r : Receptacle|r.position=Entrepot.position)
 }
 
 pred DirectementAccessible [ p1 , p2 : Position ] {
@@ -37,7 +42,7 @@ pred Accessible[p1:Position,p2:Position] {
 }
 
 fact ReceptacleAcc{
-		all r : Receptacle  |one e:Entrepot|Accessible[r.position,e.p]
+		all r : Receptacle  |one e:Entrepot|Accessible[r.position,e.position]
 }
 
 fact CoupleAcc {

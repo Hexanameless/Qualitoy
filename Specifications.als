@@ -1,9 +1,7 @@
+open GestionCouple
+
 open util/ordering[Time] as to
 sig Time {}
-
-sig Position {
-	x, y : Int
-} //Describe a position, in X or Y
 
 sig Batterie {
 	unite : Int one ->Time
@@ -16,15 +14,8 @@ sig Drone {
 	batterie : one Batterie
 } // A drone have a position on the grid 
 
-sig Receptacle {
-	position : Position,
-	capacite : Int
-} //There are receptacle which have a position on the grid 
 
-one sig Entrepot {
-	position : Position
-// receptaclesVoisins : some Receptacle        //An Entrepot contains at least one " receptables voisins " (contrainte 13)
-} // There is only one warehouse which have a position on the grid
+
 
 sig Commande {
 	produits : Int,
@@ -89,7 +80,7 @@ fact grilleReduite {
 }
 
 fact soloDeplacement {
-	all d : Drone | all t,t1 : Time | t1!=t.next || distanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
+	all d : Drone | all t,t1 : Time | t1!=t.next || DistanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
 }
 
 fact soloCapaDrone {
@@ -132,17 +123,9 @@ fact soloPosition  {
 	p0.y = p1.y)
 }
 
-fun absoluteValue [ a : Int ] : Int {
-    a>=0 => a 
-    else mul[-1,a] 
-}
-
-fun distanceManhattan [ p1, p2 : Position ] : Int {
-    plus [ absoluteValue [ minus[p1.x, p2.x] ] ,  absoluteValue [ minus[p1.y, p2.y] ] ]
-}
 
 pred voisin [ p : Position ]{ // voisin : distance de manhattan = 1 unité
-   some  r : Receptacle | distanceManhattan[r.position,p]=1
+   some  r : Receptacle | DistanceManhattan[r.position,p]=1
 }
 
 pred voisinEntrepot {
@@ -152,7 +135,7 @@ pred voisinEntrepot {
 
 
 pred distanceReceptacle { // contrainte 14
-	no r1: Receptacle | all r2:Receptacle | ( ( r1!=r2 ) && ( distanceManhattan [r1.position,r2.position] > 3 ))
+	no r1: Receptacle | all r2:Receptacle | ( ( r1!=r2 ) && ( DistanceManhattan [r1.position,r2.position] > 3 ))
 }
 
 
