@@ -14,9 +14,6 @@ sig Drone {
 	batterie : one Batterie
 } // A drone have a position on the grid 
 
-
-
-
 sig Commande {
 	produits : Int,
 	cible : Receptacle
@@ -64,7 +61,7 @@ fact recharge {
 fact tropLoin {
 	all d : Drone | all t,t1
 	"assez d'énergie" || d.currentPosition.t = d.currentPosition.t1
-*/
+
 
 fact droneInactif {
 	all d : Drone | all t,t1 : Time | some r : Receptacle | some e : Entrepot |
@@ -74,6 +71,7 @@ fact droneInactif {
 	d.currentPosition.t = e.position ||
 	d.batterie.unite.t1 = d.batterie.unite.t
 }
+*/
 
 fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
@@ -137,17 +135,38 @@ pred distanceReceptacle { // contrainte 14
 	no r1: Receptacle | all r2:Receptacle | ( ( r1!=r2 ) && ( DistanceManhattan [r1.position,r2.position] > 3 ))
 }
 
-fact conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
-	all d : Drone | all t1, t2 : Time | ( t2 = t1.next ) => (d.commande.t1 = d.commande.t2)
-}
-
 fact soloBatterie {
 	all d1,d2 : Drone | d1=d2 || d1.batterie != d2.batterie
 }
 
-pred go {}
+pred conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
+	all d : Drone | all c : Commande | all t1, t2 : Time | ( t2 = t1.next && d.commande.t1 = c )=> ( d.commande.t2 = c)
+}
 
-run go for 6
-/*fun EstAccessible [ p : Position ] : Int {
-    one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
-}*/
+pred loadCommande {
+	all d: Drone |
+	one e: Entrepot |
+	all t1, t2 : Time |  
+	(	t2 = t1.next && d.currentPosition.t1 = e.position && (no c1 : Commande | d.commande.t1 = c1)  ) => ( some c2 : Commande | d.commande.t2 = c2 ) 
+	//	t2 = t1.next && (no c1 : Commande | d.commande.t1 = c1) =>  ( some c2 : Commande | d.commande.t2 = c2 )
+}
+
+pred unloadCommande {
+	all d : Drone |
+	all c : Commande |
+	all t1, t2 : Time |
+	(
+		t2 = t1.next &&
+		d.commande.t1 = c	&&
+		d.currentPosition.t1 = c.cible.position
+	)
+	=> d.commande.t2 != c
+//	&&	d.currentPosition.t2 = d.currentPosition.t1
+}
+
+pred go {
+	one d: Drone | one e:Entrepot | one t : Time | t = first && (no c:Commande | d.commande.t = c) && d.currentPosition.t=e.position
+	&& conserverCommande && loadCommande
+}
+
+run go for 5 but exactly 4 Commande
