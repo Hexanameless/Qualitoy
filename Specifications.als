@@ -133,16 +133,21 @@ pred voisinEntrepot {
 	voisin [ e.position ]
 }
 
-
 pred distanceReceptacle { // contrainte 14
 	no r1: Receptacle | all r2:Receptacle | ( ( r1!=r2 ) && ( DistanceManhattan [r1.position,r2.position] > 3 ))
 }
 
+fact conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
+	all d : Drone | all t1, t2 : Time | ( t2 = t1.next ) => (d.commande.t1 = d.commande.t2)
+}
 
 fact soloBatterie {
 	all d1,d2 : Drone | d1=d2 || d1.batterie != d2.batterie
 }
 
-pred go{}
-run go for 4 but 10 Position, 6 Time
+pred go {}
 
+run go for 6
+/*fun EstAccessible [ p : Position ] : Int {
+    one e : Entrepot | ( DistanceManhattan [e.position,  p ] = 1 
+}*/
