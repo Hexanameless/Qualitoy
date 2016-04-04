@@ -11,6 +11,11 @@ sig Couple {
 	r : p1 -> p2
 }
 
+sig Chemin{
+	depart,arrivee:one Position,
+	value : set Couple
+}
+
 one sig Entrepot{position:Position}
 // receptaclesVoisins : some Receptacle        
 //An Entrepot contains at least one " receptables voisins " (contrainte 13)
@@ -65,7 +70,27 @@ fact DistinctCouple {
 fact nbCouple{
 	#Couple = #Receptacle
 }
+pred VerifDepart[d : Position, c : set Couple]{
+	(one co:Couple|(co in c&&co.p1=d))&&(no co:Couple|(co in c&&co.p2=d))
+}
+
+pred VerifArrivee[d : Position, c : set Couple]{
+	(one co:Couple|(co in c&&co.p2=d))&&(no co:Couple|(co in c&&co.p1=d))
+}
+
+pred Verif[d : Position, c : set Couple]{
+	VerifDepart[d,c]||VerifArrivee[d,c]||((one co:Couple|(co in c&&co.p1=d))&&(one co:Couple|(co in c&&co.p2=d)))
+}
+
+
+fact defChemin{
+
+	all c : Chemin|VerifDepart[c.depart,c.value]&&VerifArrivee[c.arrivee,c.value]&&(all co:Couple |not(co in c.value)||((co.p1=c.depart||(one co2:Couple| not co2 in c.value||co2.p2=co.p1))&&(co.p2=c.arrivee||(one co2:Couple| not co2 in c.value||co2.p1=co.p2))))
+
+}
+
+
 pred go{
 	 (no p : Position | p.x<0||p.x>4||p.y<0||p.y>4)
 }
- run  go for 10 but exactly 5 Position, exactly 2 Receptacle
+ run  go for 10 but exactly 5 Position, exactly 3 Receptacle, exactly 2 Chemin
