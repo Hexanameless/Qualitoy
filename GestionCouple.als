@@ -99,10 +99,10 @@ pred go{
      (no p : Position | p.x<0||p.x>4||p.y<0||p.y>4)
 }
 
-assert ReceptacleAcc{
+fact ReceptacleAcc{
     all r:Receptacle|(some c:Chemin|(some co:Couple|(co in c.value)&&(co.p1=r.position||co.p2=r.position)))
 }
 
-check ReceptacleAcc
+
 
 run  go for 10 but exactly 4 Position, exactly 2 Receptacle
