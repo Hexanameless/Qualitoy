@@ -169,4 +169,4 @@ pred go {
 	&& conserverCommande && loadCommande
 }
 
-run go for 5 but exactly 4 Commande
+run go for 4 but exactly 3 Commande
