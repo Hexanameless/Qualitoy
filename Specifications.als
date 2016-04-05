@@ -46,17 +46,22 @@ fact  CapBatterie {
 	all b : Batterie | all t : Time | b.unite.t <= 3  && b.unite.t >= 0
 }//La capacité de la batterie d’un drone est de 3 unités d’énergie.
 
-fact ConsommeEnergie {
-	 all d : Drone | all t,t1 : Time | t1!=t.next || d.currentPosition.t = d.currentPosition.t1 || d.batterie.unite.t1 = minus[d.batterie.unite.t,1]
-}//Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
+fact ConsommeEnergie { //Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
+	 all d : Drone | all t,t1 : Time | //Pour tout drone, à tout temps  soit : 
+	 t1!=t.next || //On ne travaille pas sur deux temps consécutifs 
+	d.currentPosition.t = d.currentPosition.t1 || //Avec deux temps consécutifs, la position est tout de même inchangée
+	d.batterie.unite.t1 = minus[d.batterie.unite.t,1] //Sinon, le drone a bougé, il perd une unité de batterie.
+}
 
-fact recharge {
-	all d : Drone | all t,t1 : Time | no r : Receptacle | no e : Entrepot |
-	 t1!=t.next || 
-	d.currentPosition.t != d.currentPosition.t1 ||
+fact recharge { //Un drone recharge 1 unité de batterie par unité de temps s'il reste sur un receptacle ou à l'entrepôt.
+	all d : Drone | all t,t1 : Time | //Pour tout drone, à tout temps 
+	 no r : Receptacle | no e : Entrepot | //Il n'existe pas de receptacle ou d'entrepot tels que soit : 
+	 t1!=t.next ||  //On ne travaille pas sur deux temps consécutifs 
+	d.currentPosition.t != d.currentPosition.t1 || //Avec deux temps consécutifs, la position est modifiée
 	(d.currentPosition.t != r.position && 
-	d.currentPosition.t != e.position) ||
-	d.batterie.unite.t1 = plus[d.batterie.unite.t,1]
+	d.currentPosition.t != e.position) || //Le drone n'a pas bougé mais n'était ni sur un receptacle, ni à l'entrepot
+	d.batterie.unite.t = 3 || //Le drone est resté sur un receptacle ou à l'entrepot mais la batterie est déjà pleine
+	d.batterie.unite.t1 = plus[d.batterie.unite.t,1] // Sinon, on recharge la batterie de 1 unité.
 }
 
 /*
