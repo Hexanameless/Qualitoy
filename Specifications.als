@@ -39,28 +39,22 @@ fact soloReceptacle {
 	r0.position = r1.position
 }
 
-fact  CapBatterie { //La capacité de la batterie d’un drone est de 3 unités d’énergie.
+fact  CapBatterie {
 	all b : Batterie | all t : Time | b.unite.t <= 3  && b.unite.t >= 0
-	 // Toute batterie possède à n'importe quel moment une charge comprise entre 0 et 3 unités
-}
+}//La capacité de la batterie d’un drone est de 3 unités d’énergie.
 
 
-fact ConsommeEnergie { //Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
-	 all d : Drone | all t,t1 : Time | //Pour tout drone, à tout temps  soit : 
-	 t1!=t.next || //On ne travaille pas sur deux temps consécutifs 
-	d.currentPosition.t = d.currentPosition.t1 || //Avec deux temps consécutifs, la position est tout de même inchangée
-	d.batterie.unite.t1 = minus[d.batterie.unite.t,1] //Sinon, le drone a bougé, il perd une unité de batterie.
-}
+fact ConsommeEnergie {
+	 all d : Drone | all t,t1 : Time | t1!=t.next || d.currentPosition.t = d.currentPosition.t1 || d.batterie.unite.t1 = minus[d.batterie.unite.t,1]
+}//Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
 
-fact recharge { //Un drone recharge 1 unité de batterie par unité de temps s'il reste sur un receptacle ou à l'entrepôt.
-	all d : Drone | all t,t1 : Time | //Pour tout drone, à tout temps 
-	 no r : Receptacle | no e : Entrepot | //Il n'existe pas de receptacle ou d'entrepot tels que soit : 
-	 t1!=t.next ||  //On ne travaille pas sur deux temps consécutifs 
-	d.currentPosition.t != d.currentPosition.t1 || //Avec deux temps consécutifs, la position est modifiée
+fact recharge {
+	all d : Drone | all t,t1 : Time | no r : Receptacle | no e : Entrepot |
+	 t1!=t.next || 
+	d.currentPosition.t != d.currentPosition.t1 ||
 	(d.currentPosition.t != r.position && 
-	d.currentPosition.t != e.position) || //Le drone n'a pas bougé mais n'était ni sur un receptacle, ni à l'entrepot
-	d.batterie.unite.t = 3 || //Le drone est resté sur un receptacle ou à l'entrepot mais la batterie est déjà pleine
-	d.batterie.unite.t1 = plus[d.batterie.unite.t,1] // Sinon, on recharge la batterie de 1 unité.
+	d.currentPosition.t != e.position) ||
+	d.batterie.unite.t1 = plus[d.batterie.unite.t,1]
 }
 
 /*
@@ -145,34 +139,38 @@ fact soloBatterie {
 	all d1,d2 : Drone | d1=d2 || d1.batterie != d2.batterie
 }
 
-pred conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
-	all d : Drone | all c : Commande | all t1, t2 : Time | ( t2 = t1.next && d.commande.t1 = c )=> ( d.commande.t2 = c)
+fact conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
+	//all d : Drone | one c : Commande | all t1, t2 : Time | ( t2 = t1.next && d.commande.t1 = c && d.currentPosition.t1 != c.cible.position )=> ( d.commande.t2 = c)
+	all d:Drone | all t1,t2 : Time |
+	(t2=t1.next && 
+	(d.currentPosition.t1 != Entrepot.position || (some c:Commande | d.commande.t1 = c)) &&
+	d.currentPosition.t1 != d.commande.t1.cible.position) => d.commande.t1 = d.commande.t2
 }
 
-pred loadCommande {
+fact chargerCommande {
 	all d: Drone |
-	one e: Entrepot |
 	all t1, t2 : Time |  
-	(	t2 = t1.next && d.currentPosition.t1 = e.position && (no c1 : Commande | d.commande.t1 = c1)  ) => ( some c2 : Commande | d.commande.t2 = c2 ) 
+	(	t2 = t1.next && d.currentPosition.t1 = Entrepot.position && (no c1 : Commande | d.commande.t1 = c1)  ) =>( ( some c2 : Commande | d.commande.t2 = c2 ) 
+	&& d.currentPosition.t2 = Entrepot.position)
 	//	t2 = t1.next && (no c1 : Commande | d.commande.t1 = c1) =>  ( some c2 : Commande | d.commande.t2 = c2 )
 }
 
-pred unloadCommande {
-	all d : Drone |
-	all c : Commande |
-	all t1, t2 : Time |
-	(
-		t2 = t1.next &&
-		d.commande.t1 = c	&&
-		d.currentPosition.t1 = c.cible.position
-	)
-	=> d.commande.t2 != c
-//	&&	d.currentPosition.t2 = d.currentPosition.t1
+fact dechargerCommande {
+	all d:Drone |
+	all t1,t2 : Time |
+	(t2=t1.next && 
+	 d.currentPosition.t1 = d.commande.t1.cible.position) 
+	=> (d.currentPosition.t2 = d.currentPosition.t1 && (no c:Commande | d.commande.t2 = c))
+ 	 
+}
+
+pred unload {
+	one d:Drone | one t : Time | t=first  && d.currentPosition.t = d.commande.t.cible.position
 }
 
 pred go {
-	one d: Drone | one e:Entrepot | one t : Time | t = first && (no c:Commande | d.commande.t = c) && d.currentPosition.t=e.position
-	&& conserverCommande && loadCommande
+	one d: Drone | one t : Time | t = first && (no c:Commande | d.commande.t = c) && d.currentPosition.t=Entrepot.position
+    && unload
 }
 
-run go for 4 but exactly 3 Commande
+run go for 5 but exactly 4 Commande, exactly 6 Time
