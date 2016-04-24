@@ -19,17 +19,14 @@ sig Commande {
 	cible : Receptacle
 }
 
-fact soloDrone {  // Two drones can not be on the same position at the same time
+fact soloDrone {  // Deux drônes ne peuvent pas être sur la même position au même moment
     all t : Time | 
 	no d0, d1 : Drone |
 	d0 != d1 && 
 	d0.currentPosition.t = d1.currentPosition.t
 }
 
-pred gui {}
-run gui for 5
-
-fact soloDroneParCommande {	// Two drones can not have the same command
+fact soloDroneParCommande {	// Deux drônes ne peuvent pas avoir la même commande
 	all t : Time |
 	no d0, d1 : Drone |
 	d0 != d1 &&
@@ -42,9 +39,9 @@ fact soloReceptacle {
 	r0.position = r1.position
 }
 
-fact  CapBatterie {
+fact  CapBatterie { //La capacité de la batterie d’un drone est de 3 unités d’énergie.
 	all b : Batterie | all t : Time | b.unite.t <= 3  && b.unite.t >= 0
-}//La capacité de la batterie d’un drone est de 3 unités d’énergie.
+}
 
 fact ConsommeEnergie { //Un drone consomme 1 unité d’énergie pour faire 1 pas sur la grille.
 	 all d : Drone | all t,t1 : Time | //Pour tout drone, à tout temps  soit : 
@@ -83,15 +80,15 @@ fact grilleReduite {
 	all p : Position | p.x>=0 && p.x<=6 && p.y>=0 && p.y<=6
 }
 
-fact soloDeplacement {
+fact soloDeplacement { // Soit un drone se déplace d'une unité, soit il reste immobile
 	all d : Drone | all t,t1 : Time | t1!=t.next || DistanceManhattan[d.currentPosition.t, d.currentPosition.t1] < 2 
 }
 
-fact soloCapaDrone {
+fact soloCapaDrone { // Une seule capacité identique à tous les drônes
 	all d1, d2 : Drone | d1.capacite = d2.capacite && d1.capacite > 0
 }
 
-fact soloCapaRecep {
+fact soloCapaRecep { // Une seule capacité identique à tous les réceptacles
 	all r1, r2 : Receptacle | r1.capacite = r2.capacite && r1.capacite > 0
 }
 
@@ -99,11 +96,11 @@ fact commandeNonVide {
 	all c: Commande | c.produits > 0
 }
 
-fact tailleCommandeDrone {
+fact tailleCommandeDrone { // On restreint le système en disant qu'il n'y a pas de commande tel qu'aucun drône ne peut s'en occuper en une fois
 	all c : Commande | no d : Drone | c.produits > d.capacite
 }
 
-fact tailleCommandeRecep {
+fact tailleCommandeRecep { // Aucun réceptacle n'a une capacité inférieur à une commande
 	all c : Commande | no r : Receptacle | c.produits > r.capacite
 }
 
@@ -115,18 +112,18 @@ fact rnb {
 	#Receptacle = 3
 }
 
-fact entrepotDiffReceptacle {
+fact entrepotDiffReceptacle { // Un receptacle et un entrepot ne peuvent pas etre sur la meme position
 	no e : Entrepot | some r1 : Receptacle | e.position = r1.position
-} // un receptacle et un entrepot ne peuvent pas etre sur la meme position
+}
 
-fact soloPosition  {
+fact soloPosition  { // Les positions sur la grille sont toutes distinctes
 	no p0, p1 : Position |
 	p0 != p1 &&
 	(p0.x = p1.x &&
 	p0.y = p1.y)
 }
 
-pred voisin [ p : Position ]{ // voisin : distance de manhattan = 1 unité
+pred voisin [ p : Position ]{ // Voisin : distance de manhattan = 1 unité
    some  r : Receptacle | DistanceManhattan[r.position,p]=1
 }
 
@@ -136,22 +133,21 @@ pred voisinEntrepot {
 }
 
 fact conserverCommande { // un drone conserve sa commande d'un temps t à t+1 ; Attention, la récupération à l'entrepôt et le dépôt à un récéptacle sont gérés ailleurs
-    //all d : Drone | one c : Commande | all t1, t2 : Time | ( t2 = t1.next && d.commande.t1 = c && d.currentPosition.t1 != c.cible.position )=> ( d.commande.t2 = c)
     all d:Drone | all t1,t2 : Time |
     (t2=t1.next && 
     (d.currentPosition.t1 != Entrepot.position || (some c:Commande | d.commande.t1 = c)) &&
     d.currentPosition.t1 != d.commande.t1.cible.position) => d.commande.t1 = d.commande.t2
 }
 
-fact chargerCommande {
+// Ne fonctionne pas tout le temps
+fact chargerCommande { // Si au temps t, le drône d1 n'a pas de commande et se trouve sur l'entrepôt, alors à t+1 il prend une commande et reste sur l'entrepôt
     all d: Drone |
     all t1, t2 : Time |  
     (    t2 = t1.next && d.currentPosition.t1 = Entrepot.position && (no c1 : Commande | d.commande.t1 = c1)  ) =>( ( some c2 : Commande | d.commande.t2 = c2 ) 
     && d.currentPosition.t2 = Entrepot.position)
-    //    t2 = t1.next && (no c1 : Commande | d.commande.t1 = c1) =>  ( some c2 : Commande | d.commande.t2 = c2 )
-}
 
-fact dechargerCommande {
+// Ne fonctionne pas
+fact dechargerCommande { // Si au temps t, le drône se trouve sur un récepacle et a une commande, alors à t+1 il décharge sa commande et reste sur le réceptacle
     all d:Drone |
     all t1,t2 : Time |
     (t2=t1.next && 
@@ -160,7 +156,7 @@ fact dechargerCommande {
      
 }
 
-fact soloBatterie {
+fact soloBatterie { // Chaque drône a sa propre batterie
 	all d1,d2 : Drone | d1=d2 || d1.batterie != d2.batterie
 }
 
